@@ -293,3 +293,265 @@ function lexer(tokens) {
 }
 ```
 <a href="#back-to-top">↑回到顶部</a>
+
+### 删除重复代码
+很多时候虽然是同一个功能，但由于一两个不同点，让你不得不写两个几乎相同的函数。
+
+要想优化重复代码需要有较强的抽象能力，错误的抽象还不如重复代码。所以在抽象过程中必须要遵循 <code>SOLID</code> 原则（<code>SOLID</code> 是什么？稍后会详细介绍）。
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+function showDeveloperList(developers) {
+  developers.forEach((developer) => {
+    const expectedSalary = developer.calculateExpectedSalary();
+    const experience = developer.getExperience();
+    const githubLink = developer.getGithubLink();
+    const data = {
+      expectedSalary,
+      experience,
+      githubLink
+    };
+
+    render(data);
+  });
+}
+
+function showManagerList(managers) {
+  managers.forEach((manager) => {
+    const expectedSalary = manager.calculateExpectedSalary();
+    const experience = manager.getExperience();
+    const portfolio = manager.getMBAProjects();
+    const data = {
+      expectedSalary,
+      experience,
+      portfolio
+    };
+
+    render(data);
+  });
+}
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+function showEmployeeList(employees) {
+  employees.forEach(employee => {
+    const expectedSalary = employee.calculateExpectedSalary();
+    const experience = employee.getExperience();
+    const data = {
+      expectedSalary,
+      experience,
+    };
+    
+    switch(employee.type) {
+      case 'develop':
+        data.githubLink = employee.getGithubLink();
+        break
+      case 'manager':
+        data.portfolio = employee.getMBAProjects();
+        break
+    }
+    render(data);
+  })
+}
+```
+<a href="#back-to-top">↑回到顶部</a>
+
+### 对象设置默认属性
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+const menuConfig = {
+  title: null,
+  body: 'Bar',
+  buttonText: null,
+  cancellable: true
+};
+
+function createMenu(config) {
+  config.title = config.title || 'Foo';
+  config.body = config.body || 'Bar';
+  config.buttonText = config.buttonText || 'Baz';
+  config.cancellable = config.cancellable !== undefined ? config.cancellable : true;
+}
+
+createMenu(menuConfig);
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+const menuConfig = {
+  title: 'Order',
+  // 'body' key 缺失
+  buttonText: 'Send',
+  cancellable: true
+};
+
+function createMenu(config) {
+  config = Object.assign({
+    title: 'Foo',
+    body: 'Bar',
+    buttonText: 'Baz',
+    cancellable: true
+  }, config);
+
+  // config 就变成了: {title: "Order", body: "Bar", buttonText: "Send", cancellable: true}
+  // ...
+}
+
+createMenu(menuConfig);
+```
+<a href="#back-to-top">↑回到顶部</a>
+
+### 不要传 flag 参数
+通过 flag 的 true 或 false，来判断执行逻辑，违反了一个函数干一件事的原则。
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+function createFile(name, temp) {
+  if (temp) {
+    fs.create(`./temp/${name}`);
+  } else {
+    fs.create(name);
+  }
+}
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+function createFile(name) {
+  fs.create(name);
+}
+function createFileTemplate(name) {
+  createFile(`./temp/${name}`)
+}
+```
+<a href="#back-to-top">↑回到顶部</a>
+
+### 避免副作用（第一部分）
+函数接收一个值返回一个新值，除此之外的行为我们都称之为副作用，比如修改全局变量、对文件进行 IO 操作等。
+
+当函数确实需要副作用时，比如对文件进行 IO 操作时，请不要用多个函数/类进行文件操作，有且仅用一个函数/类来处理。也就是说副作用需要在唯一的地方处理。
+
+副作用的三大天坑：随意修改可变数据类型、随意分享没有数据结构的状态、没有在统一地方处理副作用。
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+// 全局变量被一个函数引用
+// 现在这个变量从字符串变成了数组，如果有其他的函数引用，会发生无法预见的错误。
+var name = 'Ryan McDermott';
+
+function splitIntoFirstAndLastName() {
+  name = name.split(' ');
+}
+
+splitIntoFirstAndLastName();
+
+console.log(name); // ['Ryan', 'McDermott'];
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+var name = 'Ryan McDermott';
+var newName = splitIntoFirstAndLastName(name)
+
+function splitIntoFirstAndLastName(name) {
+  return name.split(' ');
+}
+
+console.log(name); // 'Ryan McDermott';
+console.log(newName); // ['Ryan', 'McDermott'];
+```
+<a href="#back-to-top">↑回到顶部</a>
+
+### 避免副作用（第二部分）
+
+在 JavaScript 中，基本类型通过赋值传递，对象和数组通过引用传递。以引用传递为例：
+
+<p>假如我们写一个购物车，通过 <code>addItemToCart()</code> 方法添加商品到购物车，修改 <code>购物车数组</code>。此时调用 <code>purchase()</code> 方法购买，由于引用传递，获取的 <code>购物车数组</code> 正好是最新的数据。</p>
+
+看起来没问题对不对？
+
+<p>如果当用户点击购买时，网络出现故障， <code>purchase()</code> 方法一直在重复调用，与此同时用户又添加了新的商品，这时网络又恢复了。那么 <code>purchase()</code> 方法获取到 <code>购物车数组</code> 就是错误的。</p>
+
+<p>为了避免这种问题，我们需要在每次新增商品时，克隆 <code>购物车数组</code> 并返回新的数组。</p>
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+const addItemToCart = (cart, item) => {
+  cart.push({ item, date: Date.now() });
+};
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+const addItemToCart = (cart, item) => {
+  return [...cart, {item, date: Date.now()}]
+};
+```
+<a href="#back-to-top">↑回到顶部</a>
+
+### 不要写全局方法
+<p>在 JavaScript 中，永远不要污染全局，会在生产环境中产生难以预料的 bug。举个例子，比如你在 <code>Array.prototype</code> 上新增一个 <code>diff</code> 方法来判断两个数组的不同。而你同事也打算做类似的事情，不过他的 <code>diff</code> 方法是用来判断两个数组首位元素的不同。很明显你们方法会产生冲突，遇到这类问题我们可以用 ES2015/ES6 的语法来对 <code>Array</code> 进行扩展。</p>
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+Array.prototype.diff = function diff(comparisonArray) {
+  const hash = new Set(comparisonArray);
+  return this.filter(elem => !hash.has(elem));
+};
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+class SuperArray extends Array {
+  diff(comparisonArray) {
+    const hash = new Set(comparisonArray);
+    return this.filter(elem => !hash.has(elem));        
+  }
+}
+```
+<a href="#back-to-top">↑回到顶部</a>
+
+### 比起命令式我更喜欢函数式编程
+函数式变编程可以让代码的逻辑更清晰更优雅，方便测试。
+
+<strong>Bad: </strong>
+```javascript {.class1 .class .line-numbers}
+const programmerOutput = [
+  {
+    name: 'Uncle Bobby',
+    linesOfCode: 500
+  }, {
+    name: 'Suzie Q',
+    linesOfCode: 1500
+  }, {
+    name: 'Jimmy Gosling',
+    linesOfCode: 150
+  }, {
+    name: 'Gracie Hopper',
+    linesOfCode: 1000
+  }
+];
+
+let totalOutput = 0;
+
+for (let i = 0; i < programmerOutput.length; i++) {
+  totalOutput += programmerOutput[i].linesOfCode;
+}
+```
+<strong>Good: </strong>
+```javascript {.class1 .class .line-numbers}
+const programmerOutput = [
+  {
+    name: 'Uncle Bobby',
+    linesOfCode: 500
+  }, {
+    name: 'Suzie Q',
+    linesOfCode: 1500
+  }, {
+    name: 'Jimmy Gosling',
+    linesOfCode: 150
+  }, {
+    name: 'Gracie Hopper',
+    linesOfCode: 1000
+  }
+];
+let totalOutput = programmerOutput
+  .map(output => output.linesOfCode)
+  .reduce((totalLines, lines) => totalLines + lines, 0)
+```

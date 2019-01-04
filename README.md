@@ -6,6 +6,6 @@
 ## 目录
 ```
 ├── code_optimization   // 代码优化
-│   ├── [code_concise](./code_optimization/code_concise)    // 代码简洁 2019/01/04
+│   ├── [代码简洁](https://github.com/PatrickChou/Improve-code-quality/blob/master/code_optimization/code_concise.md)    // 代码简洁 2019/01/04
 ```
 

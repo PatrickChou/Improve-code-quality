@@ -4,8 +4,6 @@
 #### 故创建这个以学习为目的的项目，废话不多说，正文开始
 
 ## 目录
-```
-├── code_optimization   // 代码优化
-│   ├── [代码简洁](https://github.com/PatrickChou/Improve-code-quality/blob/master/code_optimization/code_concise.md)    // 代码简洁 2019/01/04
-```
 
+├── code_optimization   // 代码优化<br />
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── [代码简洁](https://github.com/PatrickChou/Improve-code-quality/blob/master/code_optimization/code_concise.md)    // 代码简洁 2019/01/04

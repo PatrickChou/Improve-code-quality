@@ -1,5 +1,5 @@
-#### 我们将从几个方面展开讨论：
 <a name="back-to-top"></a>
+#### 我们将从几个方面展开讨论：
 1. <a href="#variables">变量</a>
 2. <a href="#function">函数</a>
 3. 对象和数据结构
@@ -11,8 +11,8 @@
 9. 代码风格
 10. 注释
 
-# 变量
 <a name="variables"></a>
+# 变量
 ### 用有意义且常用的单词命名变量
 <strong>Bad: </strong>
 ```ruby
@@ -148,8 +148,8 @@ function createMicrobrewery(name = 'Hipster Brew Co.') {
 ```
 <a href="#back-to-top">↑回到顶部</a>
 
-# 函数
 <a name="function"></a>
+# 函数
 
 ### 参数越少越好
 如果参数超过两个，使用 <code>ES2015/ES6</code> 的解构语法，不用考虑参数的顺序。

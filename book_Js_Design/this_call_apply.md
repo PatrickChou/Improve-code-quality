@@ -159,4 +159,4 @@ getName.call( obj2 ); // 输出: anne
 ```
 
 ### 回到目录
-[《JavaScript设计模式与开发实践》最全知识点汇总大全]
+[《JavaScript设计模式与开发实践》最全知识点汇总大全](https://github.com/PatrickChou/Improve-code-quality/blob/master/book_Js_Design/CONTENTS.md)

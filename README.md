@@ -6,4 +6,5 @@
 ## 目录
 
 [代码简洁](https://github.com/PatrickChou/Improve-code-quality/blob/master/code_optimization/code_concise.md)
-   
+
+[《JavaScript设计模式与开发实践》最全知识点汇总大全](https://github.com/PatrickChou/Improve-code-quality/blob/master/book_Js_Design/CONTENTS.md)
